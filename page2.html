@@ -680,10 +680,7 @@ background-color: #042275;
             
             <div class="wr-box-order box2">
                 <div class="order-box">
-                    नाम: *. **** ****, कस्बा: *******<br>
-                    1 आइटम का ऑर्डर दिया
                 </div>
-            </div>
 
 	
 	
@@ -752,97 +749,55 @@ $(document).ready(function () {
 
 </script> 
 
-
-
-
-
-
-
 <script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbzCi1A06Yy5j20YkHBJE9u_abLn9LMr8kVh0qGWOMfGDVqTHVlXbGBh0PyQwsWYnFhRBg/exec';
+  // 1. REPLACE THIS URL with your "Web App" URL after deploying
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbxauslwAmcRWWUt90ZiBov2O3uW-qw4yDnzuvCTv3n5pyA5UkPrxdpruE1Kue1TxNQnyA/exec';
+  const form = document.forms['google-sheet'];
 
-  const forms = document.querySelectorAll('form[name="google-sheet"]');
-  
-forms.forEach(form => {
-    form.addEventListener('submit', e => {
-        e.preventDefault();
+  form.addEventListener('submit', e => {
+    e.preventDefault();
 
-        if (!form.checkValidity()) {
-            return;
-        }
+    // Show the visual feedback (overlay)
+    submitLead(); 
 
+    // Disable button to prevent double clicks
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerText = "Processing...";
 
-        // Disable the submit button
-        const submitButton = form.querySelector('button[type="submit"]');
-        submitButton.style.visibility = 'hidden';
-
-        // Create and append the image element
-        const loadingImage = document.createElement('img');
-        loadingImage.src = 'webfiles/processing.gif'; 
-
-        // Append the loading image
-        form.appendChild(loadingImage);
-
-        fetch(scriptURL, { method: 'POST', body: new FormData(form) })
-            .then(response => {
-                window.location.href = 'thankyou.html';
-            })
-            .catch(error => {
-                console.error('Error!', error.message);
-            })
-            .finally(() => {
-                submitButton.style.visibility = 'hidden';
-                form.removeChild(loadingImage);
-            });
+    // Send data to Google Sheet
+    fetch(scriptURL, { 
+        method: 'POST', 
+        body: new FormData(form)
+    })
+    .then(response => {
+        // Success: Redirect to thank you page
+        window.location.href = 'thankyou.html';
+    })
+    .catch(error => {
+        console.error('Error!', error.message);
+        alert('Submission failed. Please check your connection.');
+        btn.disabled = false;
+        btn.innerText = "ऑर्डर करे";
     });
-});
+  });
 
+  // UI Functions for the loading messages
+  function showMessage(message) {
+    var overlay = document.getElementById('overlay');
+    var messageDiv = document.getElementById('message');
+    if(overlay && messageDiv) {
+        messageDiv.innerText = message;
+        overlay.style.display = 'block';
+    }
+  }
 
-
-
-
-
-
-
-
-</script>
-
-
-
-
-
-
-
-
-
-
-
-<script>
-function showMessage(message) {
-  var overlay = document.getElementById('overlay');
-  var messageDiv = document.getElementById('message');
-  messageDiv.innerText = message;
-  overlay.style.display = 'block';
-}
-
-function hideMessage() {
-  var overlay = document.getElementById('overlay');
-  overlay.style.display = 'none';
-}
-
-function submitLead() {
-  showMessage("Please wait...");
-  setTimeout(function() {
-    showMessage("Lead submitting...");
+  function submitLead() {
+    showMessage("Please wait...");
     setTimeout(function() {
-      showMessage("Order Success");
-      setTimeout(function() {
-        hideMessage();
-      }, 2000); // Adjust the delay before hiding the message
-    }, 2000); // Adjust the delay for "Lead submitting" message
-  }, 2000); // Adjust the delay for "Please wait" message
-}
-
+      showMessage("Saving your order...");
+    }, 1500);
+  }
 </script>
 <link href="css/cert-spin.css" rel="stylesheet">
 
